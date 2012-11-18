@@ -1,6 +1,7 @@
 (ns picasso.ui
   (:import [processing.core PConstants])
-  (:use quil.core))
+  (:use [quil.core]
+        [tween-clj.core :exclude [constrain]]))
 
 (def screen-w 640)
 (def screen-h 360)
@@ -8,6 +9,9 @@
 (def xmag 0.0)
 (def ymag 0.0)
 
+
+(defn current-time []
+ (mod (System/currentTimeMillis) 10000))
 
 (def front
   [[-1 -1 1]
@@ -47,6 +51,10 @@
 
 
 (defn setup []
+  (camera 0  0  600
+          0 0 -5000
+          0 1 0)
+
   (no-stroke)
   (color-mode :rgb 1))
 
@@ -61,15 +69,14 @@
          (apply vertex v)))))
 
 (defn draw-cubie [cubie]
-  (let [x (+ (* s (:x cubie) 2) (/ screen-w 2))
-        y (+ (* s (:y cubie) 2) (/ screen-h 2))
+  (let [x (* s (:x cubie) 2)
+        y (* s (:y cubie) 2)
         z (* s (:z cubie) 2)]
-
 
   (push-matrix)
 
   (translate x y z)
-  (scale s)
+  (scale 38)
   (begin-shape :quads)
 
   (draw-face up (:u cubie))
@@ -86,10 +93,13 @@
 )
 
 
+(defn active [cube]
+ (filter #(= (:x %) 1) cube))
+
 
 (defn draw-cube [cube]
 
-  (doseq [cubie cube]
+  (doseq [cubie (filter #(not (contains? (set (active cube)) %)) cube)]
    (draw-cubie cubie))
 )
 
@@ -112,7 +122,7 @@
 (def cube-white [1 1 1])
 (def cube-yellow [1 1 0])
 (def cube-red [1 0 0])
-(def cube-orange [1 0.4 1])
+(def cube-orange [1 0.2705 0])
 (def cube-blue [0 0 1])
 (def cube-green [0.12 0.75 0.24])
 
@@ -140,8 +150,11 @@
 
 (def cube (solved-cube))
 
+
 (defn draw []
   (background 0)
+
+;  (rotate-y (* (/ (current-time) 10000) PConstants/TWO_PI 0.5))
 
   (push-matrix)
 
@@ -157,17 +170,20 @@
       (rotate-x (- ymag))))
 
 
+  (push-matrix)
+  (doseq [cubie (active cube)]
 
-  (draw-cube cube)
-
-
+      (with-rotation [(* Math/PI 0.5 (ease-out transition-back (/ (current-time) 10000))) 1 0 0]
+    (with-translation [0 0 0]
+    (draw-cubie cubie))))
 
 
 
   (pop-matrix)
 
 
-  )
+  (draw-cube cube)
+  (pop-matrix))
 
 (defsketch main
   :title "rgb cube"
