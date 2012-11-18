@@ -109,7 +109,36 @@
         z (range -1 2)]
     (random-cubie x y z)))
 
-(def cube (random-cube))
+(def cube-white [1 1 1])
+(def cube-yellow [1 1 0])
+(def cube-red [1 0 0])
+(def cube-orange [1 0.4 1])
+(def cube-blue [0 0 1])
+(def cube-green [0.12 0.75 0.24])
+
+(defn add-color [cubie [key color cond]]
+  (if cond
+    (merge cubie {key color})
+    cubie))
+
+(defn solved-cubie [x y z]
+  (let [blank-cubie {:x x :y y :z z}]
+   (reduce add-color blank-cubie [
+    [:u cube-white (= y -1)]
+    [:d cube-yellow (= y 1)]
+    [:l cube-red (= x -1)]
+    [:r cube-orange (= x 1)]
+    [:f cube-blue (= z 1)]
+    [:b cube-green (= z -1)]])))
+
+
+(defn solved-cube []
+  (for [x (range -1 2)
+        y (range -1 2)
+        z (range -1 2)]
+    (solved-cubie x y z)))
+
+(def cube (solved-cube))
 
 (defn draw []
   (background 0)
