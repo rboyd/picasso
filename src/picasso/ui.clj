@@ -3,8 +3,8 @@
   (:use [quil.core]
         [tween-clj.core :exclude [constrain]]))
 
-(def screen-w 640)
-(def screen-h 360)
+(def screen-w 1280)
+(def screen-h 1064)
 
 (def xmag 0.0)
 (def ymag 0.0)
@@ -84,7 +84,7 @@
           0 0 -5000
           0 1 0)
 
-  (def remaining-moves (atom [:r :r :r :r :r :r]))
+;  (def remaining-moves (atom [:r :r :r :r :r :r]))
   (def cube (atom (solved-cube)))
 
   (no-stroke)
@@ -119,12 +119,12 @@
 
 (defn cubies-from-move []
   (case (first @remaining-moves)
-    :u #(= (:y %) -1)
-    :d #(= (:y %) 1)
-    :l #(= (:x %) -1)
-    :r #(= (:x %) 1)
-    :f #(= (:z %) 1)
-    :b #(= (:z %) -1)
+    (:u' :u) #(= (:y %) -1)
+    (:d' :d) #(= (:y %) 1)
+    (:l' :l) #(= (:x %) -1)
+    (:r' :r) #(= (:x %) 1)
+    (:f' :f) #(= (:z %) 1)
+    (:b' :b) #(= (:z %) -1)
     #(not (= %))))
 
 (defn active [cube]
@@ -155,22 +155,28 @@
 
 (defn rotation-from-move []
   (case (first @remaining-moves)
-    :u [0 -1 0]
-    :d [0 1 0]
-    :l [-1 0 0]
-    :r [1 0 0]
-    :f [0 0 1]
-    :b [0 0 -1]
+    :u  [0 -1 0]
+    :u' [0 1 0]
+    :d  [0 1 0]
+    :d' [0 -1 0]
+    :l  [-1 0 0]
+    :l' [1 0 0]
+    :r  [1 0 0]
+    :r' [-1 0 0]
+    :f  [0 0 1]
+    :f' [0 0 -1]
+    :b  [0 0 -1]
+    :b' [0 0 1]
     [0 0 0]))
 
 (def last-time (atom (System/currentTimeMillis)))
 
 (defn move-completed? []
-  (if (>= (- (System/currentTimeMillis) @last-time) 1000)
+  (if (>= (- (System/currentTimeMillis) @last-time) 450)
     (reset! last-time (System/currentTimeMillis))
     false))
 
-(def MOVE_TIME 1500)
+(def MOVE_TIME 500)
 
 (defn rotate-u [cubie]
   (if (= (:y cubie) -1)
@@ -203,6 +209,23 @@
     cubie))
 
 
+(defn rotate-u' [cubie]
+ (last (take 4 (iterate rotate-u cubie))))
+
+(defn rotate-d' [cubie]
+ (last (take 4 (iterate rotate-d cubie))))
+
+(defn rotate-f' [cubie]
+ (last (take 4 (iterate rotate-f cubie))))
+
+(defn rotate-b' [cubie]
+ (last (take 4 (iterate rotate-b cubie))))
+
+(defn rotate-l' [cubie]
+ (last (take 4 (iterate rotate-l cubie))))
+
+(defn rotate-r' [cubie]
+ (last (take 4 (iterate rotate-r cubie))))
 
 
 
@@ -212,8 +235,7 @@
 (defn repaint! []
   (let [move (first @remaining-moves)]
     (case move
-;      (:u :d) (reset! cube (map rotate-u @cube))
-      (:u :d :r :l :f :b) (reset! cube (map (find-func move) @cube))
+      (:u :u' :d :d' :r :r' :l :l' :f :f' :b :b') (reset! cube (map (find-func move) @cube))
       nil)))
 
 (defn draw []
@@ -247,7 +269,7 @@
   (if (move-completed?)
     (do
       (repaint!)
-      (reset! remaining-moves (shuffle [:u :d :l :r :f :b]))
+;      (reset! remaining-moves (shuffle [:u :d :l :r :f :b]))
       (swap! remaining-moves rest))))
 
 (defsketch main
@@ -256,3 +278,16 @@
   :size [screen-w screen-h]
   :draw draw
   :renderer :opengl)
+
+
+(defn pons-asinorum []
+ (reset! remaining-moves [:f :f :b :b :r :r :l :l :u :u :d :d]))
+
+(defn cube-in-a-cube []
+  (reset! remaining-moves [:f :l :f :u' :r :u :f :f :l :l :u' :l' :b :d' :b' :l :l :u]))
+
+(def six-spot-steps [:u :d' :r :l' :f :b' :u :d'])
+
+(defn six-spot []
+  (reset! remaining-moves six-spot-steps))
+
