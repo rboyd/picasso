@@ -238,10 +238,25 @@
       (:u :u' :d :d' :r :r' :l :l' :f :f' :b :b') (reset! cube (map (find-func move) @cube))
       nil)))
 
+(def previous-read (atom false))
+
+(defn get-move-from-keyboard []
+  (if (key-pressed?)
+    (do
+      (if (not @previous-read)
+        (let [fmap {\f :f \F :f' \b :b \B :b' \l :l \L :l' \r :r \R :r' \u :u \U :u' \d :d \D :d'}
+              move (fmap (raw-key))]
+          (if move (swap! remaining-moves conj move))))
+      (if (not (= (key-code) 16))
+        (reset! previous-read true)))
+    (reset! previous-read false)))
+
 (defn draw []
   (background 0)
 
   (push-matrix)
+
+  (get-move-from-keyboard)
 
   (let [new-xmag (* (/ (mouse-x) screen-w) PConstants/TWO_PI)
         new-ymag (* (/ (mouse-y) screen-h) PConstants/TWO_PI)
