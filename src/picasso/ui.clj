@@ -246,7 +246,10 @@
       (if (not @previous-read)
         (let [fmap {\f :f \F :f' \b :b \B :b' \l :l \L :l' \r :r \R :r' \u :u \U :u' \d :d \D :d'}
               move (fmap (raw-key))]
-          (if move (swap! remaining-moves conj move))))
+          (when move
+            (if (empty? @remaining-moves)
+              (reset! last-time (System/currentTimeMillis)))
+            (swap! remaining-moves conj move))))
       (if (not (= (key-code) 16))
         (reset! previous-read true)))
     (reset! previous-read false)))
