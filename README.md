@@ -11,8 +11,8 @@ Most of the good stuff is in picasso.ui
 (picasso.ui/six-spot)
 ```
 
-![Solved Cube](http://example.com/images/logo.png)
-![Six Spot](http://example.com/images/logo.png)
+![Solved Cube](https://raw.github.com/wiki/rboyd/picasso/images/solved.png)
+![Six Spot](https://raw.github.com/wiki/rboyd/picasso/images/six-spot.png)
 
 
 You can control the cube with hotkeys: u, d, l, r, f, b and the capitalized versions for their primes.
